@@ -48,3 +48,25 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Style Guide
+
+The application follows a comprehensive style guide that defines colors, typography, spacing, and other design elements:
+
+### Colors
+- **Brand Colors**: Primary (#04A033), Secondary (#DDFFE7)
+- **State Colors**: Info, Success, Warning, Error
+- **Black/Grey Scales**: Various shades for text and UI elements
+
+### Typography
+- Font Family: Nunito (Google Fonts)
+- Headings: H1-H6 with specific font sizes and line heights
+- Line height ratio: 1.1x font size
+
+### Spacing
+Consistent spacing values (xs, sm, md, lg, xl, xxl) are used throughout the application.
+
+To use the style guide in components, import from the constants:
+```tsx
+import { StyleColors, Typography, Spacing, BorderRadius } from '../constants';
+```

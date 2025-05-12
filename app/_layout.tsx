@@ -6,10 +6,18 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import 'react-native-reanimated';
+import {
+  useFonts as useNunito,
+  Nunito_400Regular,
+  Nunito_500Medium,
+  Nunito_600SemiBold,
+  Nunito_700Bold,
+} from '@expo-google-fonts/nunito';
 
 import { ThemedView } from '@/components/ThemedView';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { StyleColors } from '@/constants';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -40,7 +48,7 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       {isLoading ? (
         <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#0a7ea4" />
+          <ActivityIndicator size="large" color={StyleColors.brand.primary} />
         </ThemedView>
       ) : (
         <Stack>
@@ -56,17 +64,24 @@ function RootLayoutNav() {
 
 // Layout principal que envuelve toda la app con el AuthProvider
 export default function RootLayout() {
-  const [loaded] = useFonts({
+  const [spaceMono] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  });
+  
+  const [nunitoLoaded] = useNunito({
+    Nunito_400Regular,
+    Nunito_500Medium,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
   });
 
   useEffect(() => {
-    if (loaded) {
+    if (spaceMono && nunitoLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [spaceMono, nunitoLoaded]);
 
-  if (!loaded) {
+  if (!spaceMono || !nunitoLoaded) {
     return null;
   }
 
