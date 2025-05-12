@@ -5,9 +5,10 @@ import { Link, router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserSignUpRequest, UserRole } from '../../auth/model/UserSignUpRequest';
 
 export default function RegisterScreen() {
-    const [username, setUsername] = useState('');
+    const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,7 +16,7 @@ export default function RegisterScreen() {
     const { signUp } = useAuth();
 
     const handleRegister = async () => {
-        if (!username || !email || !password || !confirmPassword) {
+        if (!fullName || !email || !password || !confirmPassword) {
             Alert.alert('Error', 'Por favor completa todos los campos');
             return;
         }
@@ -34,9 +35,16 @@ export default function RegisterScreen() {
 
         setIsLoading(true);
         try {
-            const success = await signUp(username, email, password);
+            const userSignUpRequest: UserSignUpRequest = {
+                fullName,
+                email,
+                password,
+                roles: [UserRole.ROLE_USER]
+            };
+            
+            const success = await signUp(userSignUpRequest);
             if (success) {
-                router.replace('/(tabs)');
+                router.replace('/auth/login');
             } else {
                 Alert.alert('Error', 'No se pudo crear la cuenta');
             }
@@ -66,10 +74,10 @@ export default function RegisterScreen() {
                     <ThemedView style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
-                            placeholder="Nombre de usuario"
-                            value={username}
-                            onChangeText={setUsername}
-                            autoCapitalize="none"
+                            placeholder="Nombre completo"
+                            value={fullName}
+                            onChangeText={setFullName}
+                            autoCapitalize="words"
                             placeholderTextColor="#7F8C8D"
                         />
                         <TextInput

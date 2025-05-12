@@ -5,6 +5,7 @@ import { Link, router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserSignInRequest } from '../../auth/model/UserSignInRequest';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -20,7 +21,12 @@ export default function LoginScreen() {
 
         setIsLoading(true);
         try {
-            const success = await signIn(email, password);
+            const userSignInRequest: UserSignInRequest = {
+                email,
+                password
+            };
+            
+            const success = await signIn(userSignInRequest);
             if (success) {
                 router.replace('/(tabs)');
             } else {

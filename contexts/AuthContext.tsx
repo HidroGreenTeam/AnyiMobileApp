@@ -1,20 +1,16 @@
 import type React from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Definir el tipo de usuario
-type User = {
-    id: string;
-    username: string;
-    email: string;
-};
+import { UserSignInRequest } from '@/auth/model/UserSignInRequest';
+import { UserSignUpRequest } from '@/auth/model/UserSignUpRequest';
+import { User } from '@/auth/model/User';
+import AuthService from '@/auth/services/auth-service';
 
 // Definir la estructura del contexto de autenticación
 type AuthContextType = {
     user: User | null;
     isLoading: boolean;
-    signIn: (email: string, password: string) => Promise<boolean>;
-    signUp: (username: string, email: string, password: string) => Promise<boolean>;
+    signIn: (userSignInRequest: UserSignInRequest) => Promise<boolean>;
+    signUp: (userSignUpRequest: UserSignUpRequest) => Promise<boolean>;
     signOut: () => Promise<void>;
 };
 
@@ -31,9 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const loadUser = async () => {
             setIsLoading(true);
             try {
-                const userJSON = await AsyncStorage.getItem('user');
-                if (userJSON) {
-                    setUser(JSON.parse(userJSON));
+                const userData = await AuthService.getUserData();
+                if (userData) {
+                    setUser(userData);
                 }
             } catch (error) {
                 console.error('Error al cargar el usuario:', error);
@@ -46,26 +42,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     // Función para iniciar sesión
-    const signIn = async (email: string, password: string): Promise<boolean> => {
+    const signIn = async (userSignInRequest: UserSignInRequest): Promise<boolean> => {
         setIsLoading(true);
         try {
-            // Aquí normalmente se haría una petición a un API real
-            // En este ejemplo, simulamos una autenticación exitosa
-
-            // Simulación de verificación (esto debe reemplazarse con tu lógica real)
-            if (email && password) {
-                // Usuario de prueba
-                const mockUser: User = {
-                    id: '1',
-                    username: email.split('@')[0],
-                    email,
-                };
-
-                setUser(mockUser);
-                await AsyncStorage.setItem('user', JSON.stringify(mockUser));
-                return true;
-            }
-            return false;
+            const userData = await AuthService.signIn(userSignInRequest);
+            setUser(userData);
+            return true;
         } catch (error) {
             console.error('Error al iniciar sesión:', error);
             return false;
@@ -75,25 +57,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     // Función para registrarse
-    const signUp = async (username: string, email: string, password: string): Promise<boolean> => {
+    const signUp = async (userSignUpRequest: UserSignUpRequest): Promise<boolean> => {
         setIsLoading(true);
         try {
-            // Aquí normalmente se haría una petición a un API real
-            // En este ejemplo, simulamos un registro exitoso
-
-            if (username && email && password) {
-                // Crear un nuevo usuario
-                const newUser: User = {
-                    id: Date.now().toString(),
-                    username,
-                    email,
-                };
-
-                setUser(newUser);
-                await AsyncStorage.setItem('user', JSON.stringify(newUser));
-                return true;
-            }
-            return false;
+            // Only register the user but don't set as the current logged in user
+            await AuthService.signUp(userSignUpRequest);
+            return true;
         } catch (error) {
             console.error('Error al registrarse:', error);
             return false;
@@ -106,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signOut = async () => {
         setIsLoading(true);
         try {
-            await AsyncStorage.removeItem('user');
+            await AuthService.signOut();
             setUser(null);
         } catch (error) {
             console.error('Error al cerrar sesión:', error);

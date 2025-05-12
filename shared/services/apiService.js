@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 const API_URL = 'https://ayni-backend-mono-d5akeuepdsgrauaa.canadacentral-01.azurewebsites.net/api/v1';
 
@@ -12,10 +13,19 @@ const apiClient = axios.create({
   }
 });
 
+// Helper function to get token based on platform
+const getAuthToken = async () => {
+  if (Platform.OS === 'web') {
+    return localStorage.getItem('authToken');
+  } else {
+    return await SecureStore.getItemAsync('authToken');
+  }
+};
+
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      const token = await SecureStore.getItemAsync('authToken');
+      const token = await getAuthToken();
       
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -40,7 +50,12 @@ apiClient.interceptors.response.use(
       const { status } = error.response;
       
       if (status === 401) {
-        await SecureStore.deleteItemAsync('authToken');
+        // Remove token based on platform
+        if (Platform.OS === 'web') {
+          localStorage.removeItem('authToken');
+        } else {
+          await SecureStore.deleteItemAsync('authToken');
+        }
       }
       
       return Promise.reject({
