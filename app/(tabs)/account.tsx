@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import UserService, { UserData } from '@/user/services/users';
 import AuthService from '@/auth/services/auth-service';
 import NetInfo from '@react-native-community/netinfo';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'expo-router';
 
 // Memoized MenuItem component to prevent unnecessary re-renders
 const MenuItem = memo(({ icon, title, onPress, color = '#666666', textColor = '#333333' }: {
@@ -28,6 +30,8 @@ const AccountScreen = memo(() => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState<boolean | null>(true);
+  const { signOut } = useAuth();
+  const router = useRouter();
   
   // Mock user ID for testing - in a real app, this would come from authentication
   const userId = 1;
@@ -44,15 +48,19 @@ const AccountScreen = memo(() => {
         },
         {
           text: 'Logout',
-          onPress: () => {
-            // Perform logout actions here
-            Alert.alert('Logged Out', 'You have been successfully logged out');
+          onPress: async () => {
+            try {
+              await signOut();
+              router.replace('/auth/login');
+            } catch (error) {
+              Alert.alert('Error', 'Error logging out.');
+            }
           },
           style: 'destructive'
         }
       ]
     );
-  }, []);
+  }, [signOut, router]);
 
   // Handler to retry data fetching
   const handleRetry = useCallback(() => {

@@ -59,7 +59,8 @@ export default class AuthService {
         if (Platform.OS === 'web') {
             localStorage.removeItem('authToken');
             localStorage.removeItem('userData');
-        } else {
+            // window.location.href = '/auth/login'; // Remove this, let navigation handle it
+        } else {        
             await SecureStore.deleteItemAsync('authToken');
             await SecureStore.deleteItemAsync('userData');
         }
