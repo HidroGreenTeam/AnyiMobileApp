@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyledText } from '@/components/StyledText';
 import { StyleColors, Spacing } from '@/constants';
 
-export default function CameraScreen() {
+// Use React.memo to prevent unnecessary re-renders
+const CameraScreen = memo(() => {
+  // Use useCallback for event handlers
+  const handleCapturePress = useCallback(() => {
+    console.log('Capture button pressed');
+    // Add camera capture logic here
+  }, []);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -23,13 +30,16 @@ export default function CameraScreen() {
           </StyledText>
         </View>
         
-        <TouchableOpacity style={styles.captureButton}>
+        <TouchableOpacity style={styles.captureButton} onPress={handleCapturePress}>
           <View style={styles.captureInner} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
-}
+});
+
+// Add display name for better debugging
+CameraScreen.displayName = 'CameraScreen';
 
 const styles = StyleSheet.create({
   container: {
@@ -74,4 +84,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: StyleColors.brand.primary,
   },
-}); 
+});
+
+export default CameraScreen; 

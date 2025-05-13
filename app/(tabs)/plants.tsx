@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,48 @@ interface PlantData {
   status: string;
   image: string;
 }
+
+// Plant Item component props
+interface PlantItemProps {
+  item: PlantData;
+  onPress: (id: string) => void;
+}
+
+// Plant Item component
+const PlantItem = memo<PlantItemProps>(({ item, onPress }) => {
+  const isHealthy = item.status === 'Healthy';
+  
+  const handlePress = useCallback(() => {
+    onPress(item.id);
+  }, [item.id, onPress]);
+  
+  const statusColor = useMemo(() => {
+    if (isHealthy) return StyleColors.state.success;
+    if (item.status === 'Needs Water') return StyleColors.state.warning;
+    return StyleColors.state.error;
+  }, [isHealthy, item.status]);
+  
+  return (
+    <TouchableOpacity style={styles.plantCard} onPress={handlePress}>
+      <Image source={{ uri: item.image }} style={styles.plantImage} />
+      <View style={styles.plantInfo}>
+        <StyledText weight="600">{item.name}</StyledText>
+        <View style={styles.statusRow}>
+          <View 
+            style={[
+              styles.statusDot, 
+              { backgroundColor: statusColor }
+            ]} 
+          />
+          <StyledText style={styles.statusText}>{item.status}</StyledText>
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={StyleColors.grey.grey3} />
+    </TouchableOpacity>
+  );
+});
+
+PlantItem.displayName = 'PlantItem';
 
 // Mock data for plants
 const PLANTS_DATA: PlantData[] = [
@@ -42,62 +84,49 @@ const PLANTS_DATA: PlantData[] = [
   },
 ];
 
-// Plant Item component props
-interface PlantItemProps {
-  item: PlantData;
-}
-
-// Plant Item component
-const PlantItem: React.FC<PlantItemProps> = ({ item }) => {
-  const isHealthy = item.status === 'Healthy';
+const PlantsScreen = memo(() => {
+  // Handle plant selection
+  const handlePlantPress = useCallback((id: string) => {
+    console.log(`Plant ${id} selected`);
+    // Add navigation or detail view logic here
+  }, []);
   
-  return (
-    <TouchableOpacity style={styles.plantCard}>
-      <Image source={{ uri: item.image }} style={styles.plantImage} />
-      <View style={styles.plantInfo}>
-        <StyledText weight="600">{item.name}</StyledText>
-        <View style={styles.statusRow}>
-          <View 
-            style={[
-              styles.statusDot, 
-              { 
-                backgroundColor: isHealthy 
-                  ? StyleColors.state.success 
-                  : item.status === 'Needs Water' 
-                    ? StyleColors.state.warning 
-                    : StyleColors.state.error 
-              }
-            ]} 
-          />
-          <StyledText style={styles.statusText}>{item.status}</StyledText>
-        </View>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color={StyleColors.grey.grey3} />
-    </TouchableOpacity>
-  );
-};
+  // Handle add plant button press
+  const handleAddPlant = useCallback(() => {
+    console.log('Add plant button pressed');
+    // Add navigation to add plant screen logic here
+  }, []);
+  
+  // Memoize the render item function to prevent re-creation on each render
+  const renderPlantItem = useCallback(({ item }: { item: PlantData }) => (
+    <PlantItem item={item} onPress={handlePlantPress} />
+  ), [handlePlantPress]);
+  
+  // Memoize the key extractor
+  const keyExtractor = useCallback((item: PlantData) => item.id, []);
+  
+  const isEmpty = PLANTS_DATA.length === 0;
 
-export default function PlantsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <StyledText variant="h4" weight="700">
           My Plants
         </StyledText>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddPlant}>
           <Ionicons name="add" size={24} color={StyleColors.white} />
         </TouchableOpacity>
       </View>
       
-      <FlatList
-        data={PLANTS_DATA}
-        renderItem={({ item }) => <PlantItem item={item} />}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
-      
-      {PLANTS_DATA.length === 0 && (
+      {!isEmpty ? (
+        <FlatList
+          data={PLANTS_DATA}
+          renderItem={renderPlantItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
         <View style={styles.emptyState}>
           <Ionicons name="leaf-outline" size={48} color={StyleColors.grey.grey3} />
           <StyledText variant="h5" weight="600" style={styles.emptyStateTitle}>
@@ -110,7 +139,9 @@ export default function PlantsScreen() {
       )}
     </SafeAreaView>
   );
-}
+});
+
+PlantsScreen.displayName = 'PlantsScreen';
 
 const styles = StyleSheet.create({
   container: {
@@ -185,4 +216,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: StyleColors.grey.grey3,
   },
-}); 
+});
+
+export default PlantsScreen; 

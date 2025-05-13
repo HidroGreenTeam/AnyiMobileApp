@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StyledText } from '@/components/StyledText';
 import { StyleColors, Spacing } from '@/constants';
 
-export default function DiagnoseScreen() {
+// Use React.memo to prevent unnecessary re-renders
+const DiagnoseScreen = memo(() => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -24,7 +25,10 @@ export default function DiagnoseScreen() {
       </View>
     </SafeAreaView>
   );
-}
+});
+
+// Add display name for better debugging
+DiagnoseScreen.displayName = 'DiagnoseScreen';
 
 const styles = StyleSheet.create({
   container: {
@@ -44,4 +48,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: Spacing.md,
   },
-}); 
+});
+
+export default DiagnoseScreen; 
