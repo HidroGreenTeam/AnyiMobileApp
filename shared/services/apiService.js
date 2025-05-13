@@ -94,6 +94,10 @@ export const apiService = {
   patch: (endpoint, data = {}) => {
     return apiClient.patch(endpoint, data);
   },
+
+  put: (endpoint, data = {}) => {
+    return apiClient.put(endpoint, data);
+  },
   
   upload: (endpoint, formData, onUploadProgress = () => {}) => {
     return apiClient.post(endpoint, formData, {
