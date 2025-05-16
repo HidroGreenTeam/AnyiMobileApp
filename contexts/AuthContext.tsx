@@ -1,11 +1,9 @@
-import type React from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { UserSignInRequest } from '@/auth/model/UserSignInRequest';
 import { UserSignUpRequest } from '@/auth/model/UserSignUpRequest';
 import { User } from '@/auth/model/User';
 import AuthService from '@/auth/services/auth-service';
 
-// Definir la estructura del contexto de autenticación
 type AuthContextType = {
     user: User | null;
     isLoading: boolean;
