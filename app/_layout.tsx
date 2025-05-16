@@ -21,28 +21,10 @@ import { StyleColors } from '@/constants';
 
 SplashScreen.preventAutoHideAsync();
 
+// Separate component that will be used inside the AuthProvider
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-  const segments = useSegments();
-  useEffect(() => {
-    if (isLoading) return;
-
-    const inAuthGroup = segments[0] === 'auth';
-    const currentRoute = segments.join('/');
-    
-    // Allow splash and onboarding screens to be displayed without redirection
-    const isSpecialAuthRoute = 
-      currentRoute === 'auth/splash' || 
-      currentRoute === 'auth/onboarding';
-
-    if (!user && !inAuthGroup) {
-      router.replace('/auth/splash'); // Navigate to splash screen instead of login directly
-    } else if (user && inAuthGroup && !isSpecialAuthRoute) {
-      router.replace('/');
-    }
-  }, [user, isLoading, segments, router]);
+  const { isLoading } = useAuth();  
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -76,10 +58,7 @@ export default function RootLayout() {
   
   // Redirect to the splash screen as initial route
   const segments = useSegments();
-  if (!segments[0]) {
-    return <Redirect href="/auth/splash" />;
-  }
-
+  
   useEffect(() => {
     if (spaceMono && nunitoLoaded) {
       SplashScreen.hideAsync();
@@ -88,6 +67,11 @@ export default function RootLayout() {
 
   if (!spaceMono || !nunitoLoaded) {
     return null;
+  }
+
+  // After all hooks have been called, we can do conditional rendering
+  if (!segments[0]) {
+    return <Redirect href="/auth/splash" />;
   }
 
   return (
