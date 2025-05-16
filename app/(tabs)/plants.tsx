@@ -61,29 +61,43 @@ PlantItem.displayName = 'PlantItem';
 const PLANTS_DATA: PlantData[] = [
   {
     id: '1',
-    name: 'Monstera Deliciosa',
-    status: 'Healthy',
-    image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80',
+    name: 'Café Arabica #1',
+    status: 'Sin Enfermedades',
+    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80', // Planta de café Arabica
   },
   {
     id: '2',
-    name: 'Snake Plant',
-    status: 'Needs Water',
-    image: 'https://images.unsplash.com/photo-1593482892290-f54525a4c529?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80',
+    name: 'Café Robusta #2',
+    status: 'Necesita revisión',
+    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=300&q=80', // Planta de café Robusta
   },
   {
     id: '3',
-    name: 'Peace Lily',
-    status: 'Healthy',
-    image: 'https://images.unsplash.com/photo-1567331711402-509c12c41959?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80',
+    name: 'Café Liberica #131',
+    status: 'Sin Enfermedades',
+    image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=300&q=80', // Planta de café Liberica
   },
   {
     id: '4',
-    name: 'Fiddle Leaf Fig',
-    status: 'Attention Needed',
-    image: 'https://images.unsplash.com/photo-1613737693060-1712b4e97b10?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80',
+    name: 'Café Excelsa #444',
+    status: 'Atención Necesaria',
+    image: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=300&q=80', // Planta de café Excelsa
+  },
+  {
+    id: '5',
+    name: 'Café en Flor #5',
+    status: 'Sin Enfermedades',
+    image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=300&q=80', // Flor de planta de café
+  },
+  {
+    id: '6',
+    name: 'Café Fruto Maduro #91',
+    status: 'Necesita revisión',
+    image: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=300&q=80', // Fruto maduro de café
   },
 ];
+
+
 
 const PlantsScreen = memo(() => {
   // Handle plant selection
