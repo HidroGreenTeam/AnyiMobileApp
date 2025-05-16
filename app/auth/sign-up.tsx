@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserSignUpRequest, UserRole } from '../../auth/model/UserSignUpRequest';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { UserSignUpRequest, UserRole } from '@/auth/model/UserSignUpRequest';
 import { StatusBar } from 'expo-status-bar';
+import { CiUser } from "react-icons/ci";
 
 export default function RegisterScreen() {
     const [fullName, setFullName] = useState('');
@@ -93,6 +92,9 @@ export default function RegisterScreen() {
                     {/* Full Name Input (mantenido del código original) */}
                     <Text style={styles.inputLabel}>Full Name</Text>
                     <View style={styles.inputWrapper}>
+                        <View style={styles.inputIcon}>
+                            <CiUser size={24} color="#7F8C8D" />
+                        </View>
                         <TextInput
                             style={styles.input}
                             placeholder="Full Name"

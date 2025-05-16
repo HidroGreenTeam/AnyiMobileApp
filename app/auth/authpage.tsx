@@ -1,8 +1,19 @@
-import { router } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StatusBar, SafeAreaView, StyleSheet } from 'react-native';
 
 export default function AuthPage() {
+
+  const router = useRouter();
+
+  const handleChangeToSignUp = () => {
+    router.push('/auth/sign-up');
+  }
+
+  const handleChangeToLogin = () => {
+    router.push('/auth/login');
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Status Bar */}
@@ -26,17 +37,13 @@ export default function AuthPage() {
       <View style={styles.bottomButtonsContainer}>
         <TouchableOpacity
           style={styles.signUpButton}
-          onPress={() => {
-            router.push('/auth/register');
-          }}
+          onPress={handleChangeToSignUp}
         >
           <Text style={styles.signUpText}>Sign up</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.logInButton}
-          onPress={() => {
-            router.push('/auth/login');
-          }}
+          onPress={handleChangeToLogin}
         >
           <Text style={styles.logInText}>Log in</Text>
         </TouchableOpacity>

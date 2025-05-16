@@ -12,7 +12,7 @@ export default function AuthLayout() {
                 <Stack.Screen name="splash" options={{ animation: 'none' }} />
                 <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
                 <Stack.Screen name="login" />
-                <Stack.Screen name="register" />
+                <Stack.Screen name="sign-up" />
             </Stack>
             <StatusBar style="auto" />
         </>
