@@ -65,5 +65,18 @@
 		"react-test-renderer": "18.3.1",
 		"typescript": "^5.8.3"
 	},
-	"private": true
+	"private": true,
+	"expo": {
+		"doctor": {
+			"reactNativeDirectoryCheck": {
+				"exclude": [
+					"expo-vector-icons",
+					"i18next-browser-languagedetector",
+					"i18next-http-backend",
+					"i18next"
+				],
+				"listUnknownPackages": false
+			}
+		}
+	}
 }
