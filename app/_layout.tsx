@@ -21,10 +21,14 @@ import { StyleColors } from '@/constants';
 
 SplashScreen.preventAutoHideAsync();
 
-// Separate component that will be used inside the AuthProvider
-function RootLayoutNav() {
+function RootLayoutNav({ segments }: { segments: string[] }) {
   const colorScheme = useColorScheme();
   const { isLoading } = useAuth();  
+
+  // After all hooks have been called, we can do conditional rendering
+  if (!segments[0]) {
+    return <Redirect href="/auth/splash" />;
+  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -65,18 +69,14 @@ export default function RootLayout() {
     }
   }, [spaceMono, nunitoLoaded]);
 
+  // Early return for loading fonts
   if (!spaceMono || !nunitoLoaded) {
     return null;
   }
 
-  // After all hooks have been called, we can do conditional rendering
-  if (!segments[0]) {
-    return <Redirect href="/auth/splash" />;
-  }
-
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <RootLayoutNav segments={segments} />
     </AuthProvider>
   );
 }

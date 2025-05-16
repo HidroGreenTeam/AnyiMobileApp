@@ -33,44 +33,11 @@ const AccountScreen = memo(() => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState<boolean | null>(true);
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const router = useRouter();
+  const authService = new AuthService();
   
-  // Mock user ID for testing - in a real app, this would come from authentication
-  const userId = 1;
-
-  // Use useCallback to memoize functions that are passed as props
-  const handleLogout = useCallback(() => {
-    Alert.alert(
-      t('Logout'),
-      t('Are you sure you want to logout?'),
-      [
-        {
-          text: t('Cancel'),
-          style: 'cancel'
-        },
-        {
-          text: t('Logout'),
-          onPress: async () => {
-            try {
-              await signOut();
-              router.replace('/auth/login');
-            } catch (error) {
-              Alert.alert('Error', t('Error logging out.'));
-            }
-          },
-          style: 'destructive'
-        }
-      ]
-    );
-  }, [signOut, router, t]);
-
-  // Handler to retry data fetching
-  const handleRetry = useCallback(() => {
-    setError(null);
-    fetchUserData();
-  }, []);
-  
+  // Define fetchUserData first
   const fetchUserData = useCallback(async () => {
     try {
       setLoading(true);
@@ -86,17 +53,25 @@ const AccountScreen = memo(() => {
         return;
       }
       
-      // Fetch user data from backend using our API service
-      const data = await UserService.getUserById(userId);
-      if (data) {
-        setUserData(data);
-      } else {
-        const userData = await AuthService.getUserData();
-        // convert userData to UserData type
+      if (user?.id) {
+        try {
+          const data = await UserService.getUserById(user.id);
+          if (data) {
+            setUserData(data);
+            return;
+          }
+        } catch (apiError) {
+          console.log('Error fetching from API, falling back to stored data:', apiError);
+        }
+      }
+      
+      // Fallback to stored user data
+      const userData = await authService.getUserData();
+      if (userData) {
         const userDataTyped = {
-          id: userData?.id,
+          id: userData.id,
           username: "",
-          email: userData?.email,
+          email: userData.email,
           photoUrl: ""
         }
         setUserData(userDataTyped as unknown as UserData);
@@ -115,11 +90,43 @@ const AccountScreen = memo(() => {
           email: 'andrew.ainsley@yourdomain.com',
           photoUrl: 'https://i.pravatar.cc/150?img=12'
         });
-      }
+      }    
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [user]);
+
+  // Handler to retry data fetching - must be defined after fetchUserData
+  const handleRetry = useCallback(() => {
+    setError(null);
+    fetchUserData();
+  }, [fetchUserData]);
+
+  // Use useCallback to memoize functions that are passed as props
+  const handleLogout = useCallback(() => {
+    Alert.alert(
+      t('Logout'),
+      t('Are you sure you want to logout?'),
+      [{
+          text: t('Cancel'),
+          style: 'cancel'
+        },
+        {
+          text: t('Logout'),
+          onPress: async () => {
+            try {
+              await signOut();
+              // Navigation will happen automatically via the auth context
+              router.replace('/auth/login');
+            } catch (error) {
+              Alert.alert('Error', t('Error logging out.'));
+            }
+          },
+          style: 'destructive'
+        }
+      ]
+    );
+  }, [signOut, router, t]);
 
   // Listen for network state changes
   useEffect(() => {
@@ -163,10 +170,14 @@ const AccountScreen = memo(() => {
     handleAppearance, 
     handleAnalytics, 
     handleSupport
-  ]);
-
-  useEffect(() => {
-    fetchUserData();
+  ]);  useEffect(() => {
+    let isMounted = true;
+    if (isMounted) {
+      fetchUserData();
+    }
+    return () => {
+      isMounted = false;
+    };
   }, [fetchUserData]);
 
   // Error state display
@@ -263,8 +274,7 @@ const AccountScreen = memo(() => {
             style={styles.profileImage}
           />
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{displayName}</Text>
-            <Text style={styles.profileEmail}>{email}</Text>
+            <Text style={styles.profileName}>{email}</Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color="#CCCCCC" />
         </TouchableOpacity>
