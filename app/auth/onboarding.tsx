@@ -42,7 +42,7 @@ export default function OnboardingScreen() {
   const slidesRef = useRef<FlatList<OnboardingItem>>(null);
 
   const navigateToLogin = () => {
-    router.replace('/auth/login');
+    router.replace('/auth/authpage');
   };
   
   const  goToNextSlide = () => {
