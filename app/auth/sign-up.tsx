@@ -40,14 +40,15 @@ export default function RegisterScreen() {
                 password,
                 roles: [UserRole.ROLE_USER]
             };
-            
-            const success = await signUp(userSignUpRequest);
+              const success = await signUp(userSignUpRequest);
             if (success) {
-                router.replace('/auth/login');
+                // After registration is successful, redirect user to login
+                setTimeout(() => {
+                    router.replace('/auth/login');
+                }, 0);
             } else {
                 Alert.alert('Error', 'No se pudo crear la cuenta');
-            }
-        } catch (error) {
+            }        } catch (error) {
             console.error('Error al registrarse:', error);
             Alert.alert('Error', 'Ocurrió un error al crear la cuenta');
         } finally {

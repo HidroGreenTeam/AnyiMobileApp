@@ -20,13 +20,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const authService = new AuthService();
 
-    // Verificar si el usuario ya está autenticado al cargar la aplicación
     useEffect(() => {
         const loadUser = async () => {
             setIsLoading(true);
             try {
-                const userData = await AuthService.getUserData();
+                const userData = await authService.getUserData();
                 if (userData) {
                     setUser(userData);
                 }
@@ -39,14 +39,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         loadUser();
     }, []);
-
-    // Función para iniciar sesión
     const signIn = async (userSignInRequest: UserSignInRequest): Promise<boolean> => {
         setIsLoading(true);
         try {
-            const userData = await AuthService.signIn(userSignInRequest);
-            setUser(userData);
-            return true;
+            const response = await authService.signIn(userSignInRequest);
+            if (response) {
+                setUser(response);
+                return true;
+            }
+            return false;
         } catch (error) {
             console.error('Error al iniciar sesión:', error);
             return false;
@@ -60,22 +61,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
         try {
             // Only register the user but don't set as the current logged in user
-            await AuthService.signUp(userSignUpRequest);
+            await authService.signUp(userSignUpRequest);
             return true;
         } catch (error) {
             console.error('Error al registrarse:', error);
             return false;
         } finally {
             setIsLoading(false);
-            router.push('/(tabs)')
         }
-    };
-
-    // Función para cerrar sesión
-    const signOut = async () => {
+    };    // Función para cerrar sesión
+    const signOut = async (): Promise<void> => {
         setIsLoading(true);
         try {
-            await AuthService.signOut();
+            await authService.signOut();
             setUser(null);
         } catch (error) {
             console.error('Error al cerrar sesión:', error);

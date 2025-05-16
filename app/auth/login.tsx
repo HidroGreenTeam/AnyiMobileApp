@@ -10,33 +10,34 @@ import { UserSignInRequest } from '../../auth/model/UserSignInRequest';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [password, setPassword] = useState('');    
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const { signIn, isLoading, user} = useAuth();
+    const { signIn, isLoading } = useAuth();
+    
+    const handleLoginSuccess = () => {
+        console.log('Login successful: Navigating to tabs');
+        router.replace('/(tabs)');
+    };
 
-    const handleLogin = React.useCallback(async () => {
+    const handleLogin = async () => {
         if (!email || !password) {
             Alert.alert('Error', 'Por favor completa todos los campos');
             return;
         }
 
-        try {
-            const userSignInRequest: UserSignInRequest = {
-                email,
-                password
-            };
-            
-            const success = await signIn(userSignInRequest);
-            if (!success) {
-                Alert.alert('Error', 'Credenciales incorrectas');
-            }
-
-        } catch (error) {
-            console.error('Error al iniciar sesión:', error);
-            Alert.alert('Error', 'Ocurrió un error al iniciar sesión');
+        const userSignInRequest: UserSignInRequest = {
+            email,
+            password
+        };
+        const success = await signIn(userSignInRequest);
+        console.log('Login success:', success);
+        if (success) {
+            handleLoginSuccess();
+        } else {
+            Alert.alert('Error', 'Credenciales inválidas');
         }
-    }, [email, password, signIn]);
+    };
 
     const toggleRememberMe = () => {
         setRememberMe(!rememberMe);
@@ -53,8 +54,6 @@ export default function LoginScreen() {
             "Password recovery will be available in the next update.",
             [{ text: "OK" }]
         );
-        // Once the feature is implemented, you can uncomment this:
-        // router.push('/auth/forgot-password');
     };
 
 

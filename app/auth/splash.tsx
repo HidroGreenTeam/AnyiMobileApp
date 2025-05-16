@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 
-export default function SplashScreen() {
-  useEffect(() => {
+export default function SplashScreen() {  useEffect(() => {
     const timeout = setTimeout(() => {
+      // Use replace to prevent going back to splash screen
       router.replace('/auth/onboarding');
     }, 1800);
     return () => clearTimeout(timeout);

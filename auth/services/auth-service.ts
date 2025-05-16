@@ -23,10 +23,12 @@ interface SignUpResponse {
 }
 
 export default class AuthService {
-    static async signIn(userSignInRequest: UserSignInRequest): Promise<User> {
+    async signIn(userSignInRequest: UserSignInRequest): Promise<User> {
         const response = await apiService.post('/auth/sign-in', userSignInRequest) as unknown as SignInResponse;
+        console.log("AuthService.signIn response:", response);  
         if (response && response.token) {
             await this.saveAuthToken(response.token);
+            console.log("AuthService.signIn token:", response.token);
             // convert response to User
             const user: User = {
                 id: response.id,
@@ -34,12 +36,13 @@ export default class AuthService {
                 roles: [],
             }
             await this.saveUserData(user);
+            console.log("AuthService.signIn user:", user);
             return user;
         }
         throw new Error("Invalid credentials or missing token in response");
     }
 
-    static async signUp(userSignUpRequest: UserSignUpRequest): Promise<User> {
+    async signUp(userSignUpRequest: UserSignUpRequest): Promise<User> {
         console.log("userSignUpRequest", userSignUpRequest);
         const response = await apiService.post('/auth/sign-up', userSignUpRequest) as unknown as SignUpResponse;
         console.log("response", response);
@@ -53,7 +56,7 @@ export default class AuthService {
         return user;
     }
 
-    static async signOut(): Promise<void> {
+    async signOut(): Promise<void> {
         try {
             if (Platform.OS === 'web') {
                 localStorage.removeItem('authToken');
@@ -69,7 +72,7 @@ export default class AuthService {
         }
     }
 
-    static async saveAuthToken(token: string): Promise<void> {
+    async saveAuthToken(token: string): Promise<void> {
         if (Platform.OS === 'web') {
             localStorage.setItem('authToken', token);
         } else {
@@ -77,7 +80,7 @@ export default class AuthService {
         }
     }
 
-    static async saveUserData(user: User): Promise<void> {
+    async saveUserData(user: User): Promise<void> {
         if (Platform.OS === 'web') {
             localStorage.setItem('userData', JSON.stringify(user));
         } else {
@@ -85,7 +88,7 @@ export default class AuthService {
         }
     }
 
-    static async getAuthToken(): Promise<string | null> {
+    async getAuthToken(): Promise<string | null> {
         if (Platform.OS === 'web') {
             return localStorage.getItem('authToken');
         } else {
@@ -93,7 +96,7 @@ export default class AuthService {
         }
     }
 
-    static async getUserData(): Promise<User | null> {
+    async getUserData(): Promise<User | null> {
         if (Platform.OS === 'web') {
             const userData = localStorage.getItem('userData');
             return userData ? JSON.parse(userData) : null;
@@ -103,7 +106,7 @@ export default class AuthService {
         }
     }
 
-    static async isAuthenticated(): Promise<boolean> {
+    async isAuthenticated(): Promise<boolean> {
         const token = await this.getAuthToken();
         return !!token;
     }
