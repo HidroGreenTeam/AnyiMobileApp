@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
 import { Platform, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { HapticTab } from '../../components/HapticTab';
+import { HapticTab } from '@/components/HapticTab';
+import { t } from 'i18next';
 
 const StyleColors = {
   brand: {
@@ -77,7 +77,7 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={24} name="house" color={color} style={{ marginTop: 6 }} />,
           tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 12, marginBottom: Platform.OS === 'ios' ? 10 : 5 }}>Home</Text>
+            <Text style={{ color, fontSize: 12, marginBottom: Platform.OS === 'ios' ? 10 : 5 }}>{t('Home')}</Text>
           ),
         }}
       />
@@ -87,7 +87,7 @@ export default function TabLayout() {
           title: 'Diagnose',
           tabBarIcon: ({ color }) => <IconSymbol size={24} name="checkmark.shield" color={color} style={{ marginTop: 6 }} />,
           tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 12, marginBottom: Platform.OS === 'ios' ? 10 : 5 }}>Diagnose</Text>
+            <Text style={{ color, fontSize: 12, marginBottom: Platform.OS === 'ios' ? 10 : 5 }}>{t('Diagnose')}</Text>
           ),
         }}
       />
@@ -119,7 +119,7 @@ export default function TabLayout() {
           title: 'My Plants',
           tabBarIcon: ({ color }) => <IconSymbol size={24} name="leaf" color={color} style={{ marginTop: 0 }} />,
           tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 12, marginBottom: Platform.OS === 'ios' ? 10 : 5 }}>My Plants</Text>
+            <Text style={{ color, fontSize: 12, marginBottom: Platform.OS === 'ios' ? 10 : 5 }}>{t('My Plants')}</Text>
           ),
         }}
       />
@@ -129,7 +129,7 @@ export default function TabLayout() {
           title: 'Account',
           tabBarIcon: ({ color }) => <IconSymbol size={24} name="person" color={color} style={{ marginTop: 0 }} />,
           tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 12, marginBottom: 5 }}>Account</Text>
+            <Text style={{ color, fontSize: 12, marginBottom: 5 }}>{t('Account')}</Text>
           ),
         }}
       />

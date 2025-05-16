@@ -3,7 +3,7 @@ import { useFonts } from 'expo-font';
 import { Redirect, Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { Component, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import 'react-native-reanimated';
 import {
@@ -18,6 +18,8 @@ import { ThemedView } from '@/components/ThemedView';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { StyleColors } from '@/constants';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -51,11 +53,12 @@ function RootLayoutNav() {
           <ActivityIndicator size="large" color={StyleColors.brand.primary} />
         </ThemedView>
       ) : (
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="auth" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
+            <Stack.Screen name="account/profile" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
       )}
       <StatusBar style="auto" />
     </ThemeProvider>

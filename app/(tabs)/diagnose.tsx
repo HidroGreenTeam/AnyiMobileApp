@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StyledText } from '@/components/StyledText';
 import { StyleColors, Spacing } from '@/constants';
+import { t } from 'i18next';
 
 // Use React.memo to prevent unnecessary re-renders
 const DiagnoseScreen = memo(() => {
@@ -11,7 +12,7 @@ const DiagnoseScreen = memo(() => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <StyledText variant="h4" weight="700">
-          Diagnose
+          {t('Diagnose')}
         </StyledText>
       </View>
       

@@ -32,7 +32,6 @@ export default class AuthService {
                 id: response.id,
                 email: response.email,
                 roles: [],
-                fullName: ""
             }
             await this.saveUserData(user);
             return user;
@@ -49,7 +48,6 @@ export default class AuthService {
             id: response.id,
             email: response.email,
             roles: response.roles.map(role => role as UserRole),
-            fullName: ""
         }
         await this.saveUserData(user);
         return user;

@@ -6,6 +6,8 @@ import AuthService from '@/auth/services/auth-service';
 import NetInfo from '@react-native-community/netinfo';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import i18n, { changeLanguage } from '@/i18n/i18n';
 
 // Memoized MenuItem component to prevent unnecessary re-renders
 const MenuItem = memo(({ icon, title, onPress, color = '#666666', textColor = '#333333' }: {
@@ -26,6 +28,7 @@ const MenuItem = memo(({ icon, title, onPress, color = '#666666', textColor = '#
 
 // Main component using React.memo to prevent unnecessary re-renders
 const AccountScreen = memo(() => {
+  const { t } = useTranslation();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,28 +42,28 @@ const AccountScreen = memo(() => {
   // Use useCallback to memoize functions that are passed as props
   const handleLogout = useCallback(() => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      t('Logout'),
+      t('Are you sure you want to logout?'),
       [
         {
-          text: 'Cancel',
+          text: t('Cancel'),
           style: 'cancel'
         },
         {
-          text: 'Logout',
+          text: t('Logout'),
           onPress: async () => {
             try {
               await signOut();
               router.replace('/auth/login');
             } catch (error) {
-              Alert.alert('Error', 'Error logging out.');
+              Alert.alert('Error', t('Error logging out.'));
             }
           },
           style: 'destructive'
         }
       ]
     );
-  }, [signOut, router]);
+  }, [signOut, router, t]);
 
   // Handler to retry data fetching
   const handleRetry = useCallback(() => {
@@ -93,8 +96,6 @@ const AccountScreen = memo(() => {
         const userDataTyped = {
           id: userData?.id,
           username: "",
-          firstName: userData?.fullName?.split(' ')[0] || '',
-          lastName: userData?.fullName?.split(' ')[1] || '',
           email: userData?.email,
           photoUrl: ""
         }
@@ -177,7 +178,7 @@ const AccountScreen = memo(() => {
             <View style={styles.logoContainer}>
               <Ionicons name="leaf" size={24} color="#00A86B" />
             </View>
-            <Text style={styles.headerTitle}>Account</Text>
+            <Text style={styles.headerTitle}>{t('Account')}</Text>
           </View>
 
           {/* Error Profile Section */}
@@ -187,9 +188,9 @@ const AccountScreen = memo(() => {
               size={40} 
               color="#FF6B6B" 
             />
-            <Text style={styles.errorText}>{error}</Text>
+            <Text style={styles.errorText}>{t(error)}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
-              <Text style={styles.retryButtonText}>Try Again</Text>
+              <Text style={styles.retryButtonText}>{t('Try Again')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -199,8 +200,8 @@ const AccountScreen = memo(() => {
               <Ionicons name="trophy" size={24} color="#FF9500" />
             </View>
             <View style={styles.upgradeContent}>
-              <Text style={styles.upgradeTitle}>Upgrade Plan to Unlock More!</Text>
-              <Text style={styles.upgradeSubtitle}>Enjoy all the benefits and explore more possibilities</Text>
+              <Text style={styles.upgradeTitle}>{t('Upgrade Plan to Unlock More!')}</Text>
+              <Text style={styles.upgradeSubtitle}>{t('Enjoy all the benefits and explore more possibilities')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#FFFFFF" />
           </TouchableOpacity>
@@ -210,7 +211,7 @@ const AccountScreen = memo(() => {
             <MenuItem 
               key={index} 
               icon={item.icon} 
-              title={item.title} 
+              title={t(item.title)} 
               onPress={item.onPress} 
             />
           ))}
@@ -218,7 +219,7 @@ const AccountScreen = memo(() => {
           {/* Logout Button */}
           <MenuItem
             icon="log-out-outline"
-            title="Logout"
+            title={t('Logout')}
             onPress={handleLogout}
             color="#FF6B6B"
             textColor="#FF6B6B"
@@ -233,12 +234,13 @@ const AccountScreen = memo(() => {
     return (
       <SafeAreaView style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color="#00A86B" />
-        <Text style={styles.loadingText}>Loading profile...</Text>
+        <Text style={styles.loadingText}>{t('Loading profile...')}</Text>
       </SafeAreaView>
     );
   }
 
-  const displayName = userData ? `${userData.firstName} ${userData.lastName}` : 'User';
+  const displayName = userData ? `${userData.firstName} ${userData.lastName}` : t('User');
+  console.log('User Data:', userData);
   const email = userData?.email || '';
   const photoUrl = userData?.photoUrl || 'https://via.placeholder.com/60';
 
@@ -249,11 +251,13 @@ const AccountScreen = memo(() => {
           <View style={styles.logoContainer}>
             <Ionicons name="leaf" size={24} color="#00A86B" />
           </View>
-          <Text style={styles.headerTitle}>Account</Text>
+          <Text style={styles.headerTitle}>{t('Account')}</Text>
         </View>
 
         {/* Profile Section */}
-        <TouchableOpacity style={styles.profileSection}>
+        <TouchableOpacity style={styles.profileSection}
+          onPress={() => router.push('/account/profile')}
+        >
           <Image
             source={{ uri: photoUrl }}
             style={styles.profileImage}
@@ -271,8 +275,8 @@ const AccountScreen = memo(() => {
             <Ionicons name="trophy" size={24} color="#FF9500" />
           </View>
           <View style={styles.upgradeContent}>
-            <Text style={styles.upgradeTitle}>Upgrade Plan to Unlock More!</Text>
-            <Text style={styles.upgradeSubtitle}>Enjoy all the benefits and explore more possibilities</Text>
+            <Text style={styles.upgradeTitle}>{t('Upgrade Plan to Unlock More!')}</Text>
+            <Text style={styles.upgradeSubtitle}>{t('Enjoy all the benefits and explore more possibilities')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color="#FFFFFF" />
         </TouchableOpacity>
@@ -282,15 +286,25 @@ const AccountScreen = memo(() => {
           <MenuItem 
             key={index} 
             icon={item.icon} 
-            title={item.title} 
+            title={t(item.title)} 
             onPress={item.onPress} 
           />
         ))}
 
+        {/* Language Switch Button */}
+        <TouchableOpacity
+          style={[styles.menuItem, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#F0F0F0' }]}
+          onPress={() => {
+            const newLang = i18n.language === 'es' ? 'en' : 'es';
+            changeLanguage(newLang);
+          }}
+        >
+          <Text style={[styles.menuItemText, { color: '#00A86B', fontWeight: 'bold' }]}>🌐 {i18n.language === 'es' ? 'Cambiar a Inglés' : 'Switch to Spanish'}</Text>
+        </TouchableOpacity>
         {/* Logout Button */}
         <MenuItem
           icon="log-out-outline"
-          title="Logout"
+          title={t('Logout')}
           onPress={handleLogout}
           color="#FF6B6B"
           textColor="#FF6B6B"

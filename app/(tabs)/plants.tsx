@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { StyledText } from '@/components/StyledText';
 import { StyleColors, Spacing, BorderRadius } from '@/constants';
+import { t } from 'i18next';
 
 // Define plant data type
 interface PlantData {
@@ -111,7 +112,7 @@ const PlantsScreen = memo(() => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <StyledText variant="h4" weight="700">
-          My Plants
+          {t('My Plants')}
         </StyledText>
         <TouchableOpacity style={styles.addButton} onPress={handleAddPlant}>
           <Ionicons name="add" size={24} color={StyleColors.white} />
