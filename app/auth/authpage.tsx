@@ -1,9 +1,8 @@
-import { router, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StatusBar, SafeAreaView, StyleSheet } from 'react-native';
 
 export default function AuthPage() {
-
   const router = useRouter();
 
   const handleChangeToSignUp = () => {

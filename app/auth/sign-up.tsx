@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserSignUpRequest, UserRole } from '@/auth/model/UserSignUpRequest';
 import { StatusBar } from 'expo-status-bar';
-import { CiUser } from "react-icons/ci";
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RegisterScreen() {
     const [fullName, setFullName] = useState('');
@@ -88,12 +88,11 @@ export default function RegisterScreen() {
                 </View>
 
                 {/* Form */}
-                <View style={styles.formContainer}>
-                    {/* Full Name Input (mantenido del código original) */}
+                <View style={styles.formContainer}>                    {/* Full Name Input (mantenido del código original) */}
                     <Text style={styles.inputLabel}>Full Name</Text>
                     <View style={styles.inputWrapper}>
                         <View style={styles.inputIcon}>
-                            <CiUser size={24} color="#7F8C8D" />
+                            <Ionicons name="person-outline" size={24} color="#7F8C8D" />
                         </View>
                         <TextInput
                             style={styles.input}
@@ -103,13 +102,11 @@ export default function RegisterScreen() {
                             autoCapitalize="words"
                             placeholderTextColor="#7F8C8D"
                         />
-                    </View>
-
-                    {/* Email Input */}
+                    </View>                    {/* Email Input */}
                     <Text style={styles.inputLabel}>Email</Text>
                     <View style={styles.inputWrapper}>
                         <View style={styles.inputIcon}>
-                            <Text>✉️</Text>
+                            <Ionicons name="mail-outline" size={24} color="#7F8C8D" />
                         </View>
                         <TextInput
                             style={styles.input}
@@ -120,13 +117,11 @@ export default function RegisterScreen() {
                             autoCapitalize="none"
                             placeholderTextColor="#7F8C8D"
                         />
-                    </View>
-
-                    {/* Password Input */}
+                    </View>                    {/* Password Input */}
                     <Text style={styles.inputLabel}>Password</Text>
                     <View style={styles.inputWrapper}>
                         <View style={styles.inputIcon}>
-                            <Text>🔒</Text>
+                            <Ionicons name="lock-closed-outline" size={24} color="#7F8C8D" />
                         </View>
                         <TextInput
                             style={styles.input}
@@ -137,15 +132,13 @@ export default function RegisterScreen() {
                             placeholderTextColor="#7F8C8D"
                         />
                         <TouchableOpacity style={styles.eyeIcon}>
-                            <Text>👁️</Text>
+                            <Ionicons name="eye-outline" size={24} color="#7F8C8D" />
                         </TouchableOpacity>
-                    </View>
-
-                    {/* Confirm Password Input (mantenido del código original) */}
+                    </View>                    {/* Confirm Password Input (mantenido del código original) */}
                     <Text style={styles.inputLabel}>Confirm Password</Text>
                     <View style={styles.inputWrapper}>
                         <View style={styles.inputIcon}>
-                            <Text>🔒</Text>
+                            <Ionicons name="lock-closed-outline" size={24} color="#7F8C8D" />
                         </View>
                         <TextInput
                             style={styles.input}
