@@ -11,16 +11,16 @@ import { UserSignInRequest } from '../../auth/model/UserSignInRequest';
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const { signIn } = useAuth();    const handleLogin = async () => {
+    const { signIn, isLoading, user} = useAuth();
+
+    const handleLogin = React.useCallback(async () => {
         if (!email || !password) {
             Alert.alert('Error', 'Por favor completa todos los campos');
             return;
         }
 
-        setIsLoading(true);
         try {
             const userSignInRequest: UserSignInRequest = {
                 email,
@@ -31,14 +31,12 @@ export default function LoginScreen() {
             if (!success) {
                 Alert.alert('Error', 'Credenciales incorrectas');
             }
-            // Do NOT navigate here - navigation after successful login is handled by the auth context in _layout.tsx
+
         } catch (error) {
             console.error('Error al iniciar sesión:', error);
             Alert.alert('Error', 'Ocurrió un error al iniciar sesión');
-        } finally {
-            setIsLoading(false);
         }
-    };
+    }, [email, password, signIn]);
 
     const toggleRememberMe = () => {
         setRememberMe(!rememberMe);

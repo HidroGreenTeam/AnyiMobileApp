@@ -54,13 +54,18 @@ export default class AuthService {
     }
 
     static async signOut(): Promise<void> {
-        if (Platform.OS === 'web') {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('userData');
-            // window.location.href = '/auth/login'; // Remove this, let navigation handle it
-        } else {        
-            await SecureStore.deleteItemAsync('authToken');
-            await SecureStore.deleteItemAsync('userData');
+        try {
+            if (Platform.OS === 'web') {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userData');
+            } else {
+                await SecureStore.deleteItemAsync('authToken');
+                await SecureStore.deleteItemAsync('userData');
+            }
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+            throw new Error('Error al cerrar sesión');
+
         }
     }
 

@@ -3,6 +3,7 @@ import { UserSignInRequest } from '@/auth/model/UserSignInRequest';
 import { UserSignUpRequest } from '@/auth/model/UserSignUpRequest';
 import { User } from '@/auth/model/User';
 import AuthService from '@/auth/services/auth-service';
+import { router } from 'expo-router';
 
 type AuthContextType = {
     user: User | null;
@@ -66,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return false;
         } finally {
             setIsLoading(false);
+            router.push('/(tabs)')
         }
     };
 
@@ -77,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null);
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
+            throw new Error('Error al cerrar sesión');
         } finally {
             setIsLoading(false);
         }
