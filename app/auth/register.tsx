@@ -64,7 +64,7 @@ export default function RegisterScreen() {
                 <ThemedView style={styles.container}>
                     <ThemedView style={styles.logoContainer}>
                         <Image
-                            source={require('@/assets/images/icon.png')}
+                            source={require('@/assets/images/ayni-logo.png')}
                             style={styles.logo}
                             resizeMode="contain"
                         />
@@ -117,11 +117,9 @@ export default function RegisterScreen() {
 
                         <ThemedView style={styles.loginContainer}>
                             <ThemedText>¿Ya tienes una cuenta? </ThemedText>
-                            <Link href="/auth/login" asChild>
-                                <TouchableOpacity>
-                                    <ThemedText type="link">Inicia sesión</ThemedText>
-                                </TouchableOpacity>
-                            </Link>
+                            <TouchableOpacity onPress={() => router.replace('/auth/login')}>
+                                <ThemedText type="link">Inicia sesión</ThemedText>
+                            </TouchableOpacity>
                         </ThemedView>
                     </ThemedView>
                 </ThemedView>

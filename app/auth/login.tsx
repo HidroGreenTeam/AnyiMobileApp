@@ -47,7 +47,7 @@ export default function LoginScreen() {
             <ThemedView style={styles.container}>
                 <ThemedView style={styles.logoContainer}>
                     <Image
-                        source={require('@/assets/images/icon.png')}
+                        source={require('@/assets/images/ayni-logo.png')}
                         style={styles.logo}
                         resizeMode="contain"
                     />
@@ -84,11 +84,9 @@ export default function LoginScreen() {
 
                     <ThemedView style={styles.registerContainer}>
                         <ThemedText>¿No tienes una cuenta? </ThemedText>
-                        <Link href="/auth/register" asChild>
-                            <TouchableOpacity>
-                                <ThemedText type="link">Regístrate</ThemedText>
-                            </TouchableOpacity>
-                        </Link>
+                        <TouchableOpacity onPress={() => router.push('/auth/register')}>
+                            <ThemedText type="link">Regístrate</ThemedText>
+                        </TouchableOpacity>
                     </ThemedView>
                 </ThemedView>
             </ThemedView>

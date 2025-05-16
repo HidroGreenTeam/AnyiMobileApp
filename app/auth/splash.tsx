@@ -12,8 +12,7 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
-      <Image source={require('@/assets/images/icon.png')} style={styles.logo} />
-      <Text style={styles.title}>Ayni</Text>
+      <Image source={require('@/assets/images/ayni-logo.png')} style={styles.logo} />
       <ActivityIndicator size="large" color="#fff" style={styles.loader} />
     </View>
   );

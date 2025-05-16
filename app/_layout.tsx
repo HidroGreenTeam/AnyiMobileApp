@@ -48,7 +48,6 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       {isLoading ? (
         <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ fontSize: 24, color: StyleColors.brand.primary }}>Cargando...</Text>
           <ActivityIndicator size="large" color={StyleColors.brand.primary} />
         </ThemedView>
       ) : (
@@ -77,7 +76,7 @@ export default function RootLayout() {
   
   // Redirect to the splash screen as initial route
   const segments = useSegments();
-  if (segments.length === 0) {
+  if (!segments[0]) {
     return <Redirect href="/auth/splash" />;
   }
 

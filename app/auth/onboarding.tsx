@@ -16,13 +16,13 @@ const onboardingData: OnboardingItem[] = [
     id: '1',
     title: 'Your All-in-One Plant Care Companion',
     description: 'Ayni helps you care for your plants. Set reminders, document their growth, and diagnose diseases with a quick camera scan.',
-    image: require('@/assets/images/icon.png')
+    image: require('@/assets/images/ripe-coffee-cherries-on-branch-of-coffee-tree.jpg')
   },
   {
     id: '2',
     title: 'Check Your Plant',
     description: 'Take photos, start diagnose diseases, and get plant care tips for optimal growth.',
-    image: require('@/assets/images/icon.png')
+    image: require('@/assets/images/onboarding-image2.png')
   }
 ];
 
@@ -56,7 +56,7 @@ export default function OnboardingScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.topSection}>
-        <Image source={require('@/assets/images/icon.png')} style={styles.logo} />
+        <Image source={require('@/assets/images/ayni-logo.png')} style={styles.logo} />
       </View>
       
       <FlatList
@@ -147,8 +147,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   slideImage: {
-    width: 180,
-    height: 180,
+    width: 350,
+    height: 200,
     marginBottom: 20,
     resizeMode: 'contain',
   },
