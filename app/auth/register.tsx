@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, Image, ScrollView } from 'react-native';
-import { Link, router } from 'expo-router';
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserSignUpRequest, UserRole } from '../../auth/model/UserSignUpRequest';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { StatusBar } from 'expo-status-bar';
 
 export default function RegisterScreen() {
     const [fullName, setFullName] = useState('');
@@ -35,7 +35,7 @@ export default function RegisterScreen() {
 
         setIsLoading(true);
         try {
-            const userSignUpRequest: UserSignUpRequest = {
+            const userSignUpRequest = {
                 fullName,
                 email,
                 password,
@@ -60,69 +60,126 @@ export default function RegisterScreen() {
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                <ThemedView style={styles.container}>
-                    <ThemedView style={styles.logoContainer}>
+            <StatusBar style="dark" backgroundColor="white" />
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                
+
+                {/* Back button */}
+                <TouchableOpacity 
+                    style={styles.backButton}
+                    onPress={() => router.back()}>
+                    <Text style={styles.backButtonText}>
+                        {'<'}
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Header */}
+                <View style={styles.header}>
+                    <View>
+                        <Text style={styles.headerTitle}>Join Ayni Today</Text>
+                        <Text style={styles.headerSubtitle}>Create Your Blooming Account</Text>
+                    </View>
+                    <View style={styles.avatarContainer}>
                         <Image
                             source={require('@/assets/images/ayni-logo.png')}
-                            style={styles.logo}
+                            style={styles.avatar}
                             resizeMode="contain"
                         />
-                        <ThemedText type="title">HidroGreen</ThemedText>
-                    </ThemedView>
+                    </View>
+                </View>
 
-                    <ThemedView style={styles.inputContainer}>
+                {/* Form */}
+                <View style={styles.formContainer}>
+                    {/* Full Name Input (mantenido del código original) */}
+                    <Text style={styles.inputLabel}>Full Name</Text>
+                    <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
-                            placeholder="Nombre completo"
+                            placeholder="Full Name"
                             value={fullName}
                             onChangeText={setFullName}
                             autoCapitalize="words"
                             placeholderTextColor="#7F8C8D"
                         />
+                    </View>
+
+                    {/* Email Input */}
+                    <Text style={styles.inputLabel}>Email</Text>
+                    <View style={styles.inputWrapper}>
+                        <View style={styles.inputIcon}>
+                            <Text>✉️</Text>
+                        </View>
                         <TextInput
                             style={styles.input}
-                            placeholder="Correo electrónico"
+                            placeholder="Email"
                             value={email}
                             onChangeText={setEmail}
                             keyboardType="email-address"
                             autoCapitalize="none"
                             placeholderTextColor="#7F8C8D"
                         />
+                    </View>
+
+                    {/* Password Input */}
+                    <Text style={styles.inputLabel}>Password</Text>
+                    <View style={styles.inputWrapper}>
+                        <View style={styles.inputIcon}>
+                            <Text>🔒</Text>
+                        </View>
                         <TextInput
                             style={styles.input}
-                            placeholder="Contraseña"
+                            placeholder="Password"
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry
                             placeholderTextColor="#7F8C8D"
                         />
+                        <TouchableOpacity style={styles.eyeIcon}>
+                            <Text>👁️</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Confirm Password Input (mantenido del código original) */}
+                    <Text style={styles.inputLabel}>Confirm Password</Text>
+                    <View style={styles.inputWrapper}>
+                        <View style={styles.inputIcon}>
+                            <Text>🔒</Text>
+                        </View>
                         <TextInput
                             style={styles.input}
-                            placeholder="Confirmar contraseña"
+                            placeholder="Confirm Password"
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry
                             placeholderTextColor="#7F8C8D"
                         />
+                    </View>
 
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={handleRegister}
-                            disabled={isLoading}>
-                            <ThemedText style={styles.buttonText}>
-                                {isLoading ? 'Cargando...' : 'Registrarse'}
-                            </ThemedText>
+                    {/* Login Link */}
+                    <View style={styles.loginLinkContainer}>
+                        <Text style={styles.loginText}>Already have an account? </Text>
+                        <TouchableOpacity onPress={() => router.replace('/auth/login')}>
+                            <Text style={styles.loginLink}>Log in</Text>
                         </TouchableOpacity>
+                    </View>
 
-                        <ThemedView style={styles.loginContainer}>
-                            <ThemedText>¿Ya tienes una cuenta? </ThemedText>
-                            <TouchableOpacity onPress={() => router.replace('/auth/login')}>
-                                <ThemedText type="link">Inicia sesión</ThemedText>
-                            </TouchableOpacity>
-                        </ThemedView>
-                    </ThemedView>
-                </ThemedView>
+                    {/* Divider */}
+                    <View style={styles.dividerContainer}>
+                        <View style={styles.divider}></View>
+                        <Text style={styles.dividerText}>or</Text>
+                        <View style={styles.divider}></View>
+                    </View>
+
+                    {/* Sign Up Button */}
+                    <TouchableOpacity
+                        style={styles.signUpButton}
+                        onPress={handleRegister}
+                        disabled={isLoading}>
+                        <Text style={styles.signUpButtonText}>
+                            {isLoading ? 'Cargando...' : 'Sign up'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -131,43 +188,175 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: 'white',
+    },
+    scrollContainer: {
+        flexGrow: 1,
         padding: 20,
     },
-    logoContainer: {
+    statusBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 4,
+    },
+    time: {
+        fontWeight: 'bold',
+    },
+    statusIcons: {
+        flexDirection: 'row',
+    },
+    backButton: {
+        marginTop: 10,
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+    },
+    backButtonText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 50,
+        marginTop: 20,
         marginBottom: 30,
     },
-    logo: {
-        width: 100,
-        height: 100,
-        marginBottom: 16,
+    headerTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#333',
     },
-    inputContainer: {
+    headerSubtitle: {
+        fontSize: 16,
+        color: '#888',
+        marginTop: 5,
+    },
+    avatarContainer: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#e0e0e0',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
+    avatar: {
+        width: 40,
+        height: 40,
+    },
+    formContainer: {
         width: '100%',
-        gap: 16,
+    },
+    inputLabel: {
+        fontSize: 16,
+        fontWeight: '500',
+        marginBottom: 8,
+        color: '#333',
+    },
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F5F7F8',
+        borderRadius: 8,
+        marginBottom: 20,
+        height: 50,
+    },
+    inputIcon: {
+        paddingHorizontal: 12,
     },
     input: {
-        backgroundColor: '#F5F7F8',
-        padding: 15,
-        borderRadius: 8,
+        flex: 1,
+        height: '100%',
         fontSize: 16,
+        color: '#333',
     },
-    button: {
-        backgroundColor: '#0a7ea4',
-        padding: 15,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 16,
+    eyeIcon: {
+        paddingHorizontal: 12,
     },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    loginContainer: {
+    loginLinkContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 20,
+        marginVertical: 15,
+    },
+    loginText: {
+        color: '#666',
+    },
+    loginLink: {
+        color: '#00a67d',
+        fontWeight: '500',
+    },
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    divider: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#ddd',
+    },
+    dividerText: {
+        paddingHorizontal: 10,
+        color: '#888',
+    },
+    socialButtonsContainer: {
+        gap: 16,
+        marginBottom: 20,
+    },
+    socialButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 50,
+        padding: 14,
+    },
+    googleIcon: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 10,
+    },
+    appleIcon: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 10,
+    },
+    facebookIcon: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#1877F2',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 10,
+    },
+    socialButtonIcon: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    socialButtonText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    signUpButton: {
+        backgroundColor: '#00a67d',
+        borderRadius: 50,
+        padding: 16,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    signUpButtonText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: '500',
     },
 });
