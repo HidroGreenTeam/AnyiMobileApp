@@ -1,22 +1,26 @@
 import React, { memo, useCallback, useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image, Platform, Alert, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, Platform, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Camera, CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { Camera, CameraView, CameraType } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
+import { useRouter } from 'expo-router';
 
 import { StyledText } from '@/components/StyledText';
 import { StyleColors, Spacing } from '@/constants';
+import { tfliteService, AnalysisResult } from '@/services/tflite-service';
 
 const CameraScreen = memo(() => {  
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [type, setType] = useState<'front' | 'back'>('back');
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [type, setType] = useState<'front' | 'back'>('back');  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [modelInitialized, setModelInitialized] = useState(false);
+  const [isSimulationMode, setIsSimulationMode] = useState(false);
   const cameraRef = useRef<any>(null);
-
-  // Request camera and media library permissions
+  const router = useRouter();
+  // Request camera and media library permissions and initialize model
   useEffect(() => {
     (async () => {
       const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
@@ -28,9 +32,58 @@ const CameraScreen = memo(() => {
           'Permisos insuficientes',
           'Necesitamos acceso a la cámara y galería para esta funcionalidad'
         );
+      }      // Initialize TensorFlow Lite model
+      try {
+        await tfliteService.initializeModel();
+        const modelInfo = tfliteService.getModelInfo();
+        setModelInitialized(true);
+        setIsSimulationMode(modelInfo.isSimulation);
+        console.log('Model initialized successfully', { 
+          isSimulation: modelInfo.isSimulation 
+        });
+      } catch (error) {
+        console.error('Failed to initialize model:', error);
+        Alert.alert(
+          'Error del modelo',
+          'No se pudo cargar el modelo de análisis. Algunas funciones pueden no estar disponibles.'
+        );
       }
     })();
   }, []);
+  // Analyze image with TensorFlow Lite model
+  const analyzeImage = useCallback(async (imageUri: string) => {
+    if (!modelInitialized) {
+      Alert.alert('Error', 'El modelo aún no está cargado. Inténtalo de nuevo.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const result = await tfliteService.analyzeImage(imageUri);
+      
+      const analysisResult: AnalysisResult = {
+        image: imageUri,
+        results: result,
+        timestamp: Date.now(),
+      };
+
+      // Navigate to diagnose screen with results
+      router.push({
+        pathname: '/diagnose',
+        params: {
+          analysisData: JSON.stringify(analysisResult),
+        },
+      });
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      Alert.alert(
+        'Error de análisis',
+        'No se pudo analizar la imagen. Por favor, inténtalo de nuevo.'
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [modelInitialized, router]);
 
   // Take a picture with the camera
   const handleCapturePress = useCallback(async () => {
@@ -51,7 +104,6 @@ const CameraScreen = memo(() => {
   const toggleCameraType = useCallback(() => {
     setType(current => (current === 'back' ? 'front' : 'back'));
   }, []);
-
   // Pick an image from the gallery
   const pickImage = useCallback(async () => {
     try {
@@ -109,12 +161,23 @@ const CameraScreen = memo(() => {
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+  return (    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <StyledText variant="h4" weight="700">
           Camera
         </StyledText>
+        {modelInitialized && (
+          <View style={[styles.statusIndicator, isSimulationMode ? styles.simulationMode : styles.realMode]}>
+            <Ionicons 
+              name={isSimulationMode ? "cloud-outline" : "hardware-chip-outline"} 
+              size={16} 
+              color="white" 
+            />
+            <StyledText style={styles.statusText}>
+              {isSimulationMode ? "Modo Simulación (Expo Go)" : "Modelo Real (AI)"}
+            </StyledText>
+          </View>
+        )}
       </View>
       
       <View style={styles.content}>
@@ -122,11 +185,25 @@ const CameraScreen = memo(() => {
           // Show captured image with options
           <View style={styles.imagePreviewContainer}>
             <Image source={{ uri: capturedImage }} style={styles.imagePreview} />
-            
-            <View style={styles.previewControls}>
+              <View style={styles.previewControls}>
               <TouchableOpacity style={styles.controlButton} onPress={retakePicture}>
                 <Ionicons name="refresh" size={24} color={StyleColors.grey.grey1} />
                 <StyledText style={styles.buttonText}>Volver a tomar</StyledText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.controlButton, styles.analyzeButton]} 
+                onPress={() => capturedImage && analyzeImage(capturedImage)}
+                disabled={isAnalyzing || !modelInitialized}
+              >
+                {isAnalyzing ? (
+                  <ActivityIndicator size={24} color="white" />
+                ) : (
+                  <Ionicons name="scan" size={24} color="white" />
+                )}
+                <StyledText style={[styles.buttonText, styles.analyzeButtonText]}>
+                  {isAnalyzing ? 'Analizando...' : 'Analizar'}
+                </StyledText>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.controlButton} onPress={savePicture}>
@@ -279,10 +356,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.md,
-  },
-  buttonText: {
+  },  buttonText: {
     marginTop: Spacing.xs,
     fontSize: 12,
+  },
+  analyzeButton: {
+    backgroundColor: StyleColors.brand.primary,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },  analyzeButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: 20,
+    marginTop: Spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  simulationMode: {
+    backgroundColor: '#FF9500', // Orange for simulation
+  },
+  realMode: {
+    backgroundColor: '#34C759', // Green for real AI
+  },
+  statusText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: Spacing.xs,
   },
 });
 
