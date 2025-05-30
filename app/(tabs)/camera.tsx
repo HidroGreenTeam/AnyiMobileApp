@@ -13,7 +13,8 @@ import { tfliteService, AnalysisResult } from '@/services/tflite-service';
 
 const CameraScreen = memo(() => {  
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [type, setType] = useState<'front' | 'back'>('back');  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [type, setType] = useState<'front' | 'back'>('back');
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [modelInitialized, setModelInitialized] = useState(false);
@@ -27,12 +28,13 @@ const CameraScreen = memo(() => {
       const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
       setHasPermission(cameraStatus === 'granted' && mediaStatus === 'granted');
       
-      if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
-        Alert.alert(
+      if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {        Alert.alert(
           'Permisos insuficientes',
           'Necesitamos acceso a la cámara y galería para esta funcionalidad'
         );
-      }      // Initialize TensorFlow Lite model
+      }
+      
+      // Initialize TensorFlow Lite model
       try {
         await tfliteService.initializeModel();
         const modelInfo = tfliteService.getModelInfo();
@@ -161,7 +163,8 @@ const CameraScreen = memo(() => {
     );
   }
 
-  return (    <SafeAreaView style={styles.container} edges={['top']}>
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <StyledText variant="h4" weight="700">
           Camera
@@ -211,8 +214,7 @@ const CameraScreen = memo(() => {
                 <StyledText style={styles.buttonText}>Guardar</StyledText>
               </TouchableOpacity>
             </View>
-          </View>
-        ) : (
+          </View>        ) : (
           // Show camera
           <>
             <View style={styles.camera}>
@@ -221,13 +223,14 @@ const CameraScreen = memo(() => {
                 style={styles.camera}
                 facing={type}
                 onCameraReady={() => setCameraReady(true)}
-              >
-                <View style={styles.cameraControls}>
-                  <TouchableOpacity style={styles.flipButton} onPress={toggleCameraType}>
-                    <Ionicons name="camera-reverse" size={28} color="white" />
-                  </TouchableOpacity>
-                </View>
-              </CameraView>
+              />
+              
+              {/* Camera controls overlay */}
+              <View style={styles.cameraControls}>
+                <TouchableOpacity style={styles.flipButton} onPress={toggleCameraType}>
+                  <Ionicons name="camera-reverse" size={28} color="white" />
+                </TouchableOpacity>
+              </View>
             </View>
             
             <View style={styles.bottomControls}>
@@ -268,8 +271,7 @@ const styles = StyleSheet.create({
   centerText: {
     textAlign: 'center',
     marginTop: Spacing.md,
-  },
-  camera: {
+  },  camera: {
     width: '100%',
     height: '75%',
     borderRadius: 12,
@@ -277,17 +279,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: StyleColors.grey.grey5,
+    position: 'relative',
   },
   cameraPlaceholder: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   cameraControls: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    left: 0,
+    bottom: 0,
     backgroundColor: 'transparent',
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    margin: Spacing.md,
+    alignItems: 'flex-start',
+    padding: Spacing.md,
   },
   bottomControls: {
     flexDirection: 'row',
