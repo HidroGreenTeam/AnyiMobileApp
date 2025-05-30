@@ -75,7 +75,7 @@ export default function ModelTestScreen() {
       setTestResult({
         isLoaded: false,
         isSimulation: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -101,7 +101,7 @@ export default function ModelTestScreen() {
       setTestResult({
         isLoaded: false,
         isSimulation: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -117,7 +117,7 @@ export default function ModelTestScreen() {
       setTestResult({
         isLoaded: false,
         isSimulation: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -141,7 +141,7 @@ export default function ModelTestScreen() {
       setTestResult({
         isLoaded: false,
         isSimulation: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   };
