@@ -3,13 +3,22 @@ import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import { PLANT_ANALYSIS_CONFIG, MODEL_RECOMMENDATIONS, PlantCondition } from '@/config/model-config';
+import { DEVELOPMENT_CONFIG } from '@/config/development-config';
+import { devLogger } from './development-logger';
+import { modelSimulation } from './model-simulation';
 
 // Check if TensorFlow Lite is available (for Expo Go compatibility)
 const isTensorFlowLiteAvailable = () => {
   try {
+    // Comprobar configuración de desarrollo
+    if (DEVELOPMENT_CONFIG.forceSimulationMode) {
+      devLogger.info('Simulation mode forced by development configuration');
+      return false;
+    }
+    
     // Check if the native module is available
     if (typeof loadTensorflowModel === 'undefined') {
-      console.warn('TensorFlow Lite module not found');
+      devLogger.warn('TensorFlow Lite module not found');
       return false;
     }
     
@@ -17,13 +26,14 @@ const isTensorFlowLiteAvailable = () => {
     const globalAny = global as any;
     if (globalAny.__DEV__ && globalAny.expo && !globalAny.__EXPO_CLI_SERVER_URL__) {
       // This is likely Expo Go
-      console.warn('Running in Expo Go - TensorFlow Lite not supported');
+      devLogger.warn('Running in Expo Go - TensorFlow Lite not supported');
       return false;
     }
     
+    devLogger.info('TensorFlow Lite is available');
     return true;
   } catch (error) {
-    console.warn('TensorFlow Lite not available - running in Expo Go mode:', error);
+    devLogger.warn('TensorFlow Lite not available - running in Expo Go mode', error);
     return false;
   }
 };
@@ -39,6 +49,12 @@ export interface ModelResult {
     };
   }>;
   processingTime: number;
+  metadata?: {
+    isSimulated?: boolean;
+    modelVersion?: string;
+    inputShape?: number[];
+    detectedPatterns?: string[];
+  };
 }
 
 export interface AnalysisResult {
@@ -50,29 +66,30 @@ export interface AnalysisResult {
 class TFLiteService {
   private model: TensorflowModel | null = null;
   private isModelLoaded = false;
+  private analysisHistory: AnalysisResult[] = [];
 
   /**
    * Get the model source for loading
    */
   private async getModelSource(): Promise<any> {
-    console.log('🔍 Starting model source detection...');
+    devLogger.debug('Starting model source detection...');
     
     try {
       // Method 1: Use Expo Asset (most reliable approach)
-      console.log('📦 Trying Expo Asset approach...');
+      devLogger.debug('Trying Expo Asset approach...');
       try {
         const asset = Asset.fromModule(require('../assets/model/model.tflite'));
-        console.log('✅ Asset created successfully');
+        devLogger.debug('Asset created successfully');
         
         await asset.downloadAsync();
-        console.log('✅ Asset downloaded successfully');
+        devLogger.debug('Asset downloaded successfully');
         
         if (asset.localUri) {
-          console.log('✅ Model loaded via Asset:', asset.localUri);
+          devLogger.info('Model loaded via Asset', { localUri: asset.localUri });
           
           // Verify file exists
           const fileInfo = await FileSystem.getInfoAsync(asset.localUri);
-          console.log('📊 File info:', fileInfo);
+          devLogger.debug('File info', fileInfo);
           
           if (fileInfo.exists) {
             return { uri: asset.localUri };
@@ -83,99 +100,99 @@ class TFLiteService {
           throw new Error('Asset localUri is null after download');
         }
       } catch (assetError) {
-        console.warn('❌ Asset loading failed:', assetError);
+        devLogger.warn('Asset loading failed', assetError);
       }
 
       // Method 2: Try direct require (fallback)
-      console.log('📁 Trying direct require approach...');
+      devLogger.debug('Trying direct require approach...');
       try {
         const modelAsset = require('../assets/model/model.tflite');
-        console.log('✅ Require result:', typeof modelAsset, modelAsset);
+        devLogger.debug('Require result', { type: typeof modelAsset, value: modelAsset });
         
         if (modelAsset && typeof modelAsset !== 'undefined') {
-          console.log('✅ Model loaded via require:', modelAsset);
+          devLogger.info('Model loaded via require', modelAsset);
           return modelAsset;
         } else {
           throw new Error('Require returned undefined or null');
         }
       } catch (requireError) {
-        console.warn('❌ Require failed:', requireError);
+        devLogger.warn('Require failed', requireError);
       }
 
       // Method 3: Try bundle path
-      console.log('📂 Trying bundle path approach...');
+      devLogger.debug('Trying bundle path approach...');
       try {
         const bundlePath = `${FileSystem.bundleDirectory}assets/model/model.tflite`;
-        console.log('🔍 Checking bundle path:', bundlePath);
+        devLogger.debug('Checking bundle path', { bundlePath });
         
         const bundleInfo = await FileSystem.getInfoAsync(bundlePath);
-        console.log('📊 Bundle file info:', bundleInfo);
+        devLogger.debug('Bundle file info', bundleInfo);
         
         if (bundleInfo.exists) {
-          console.log('✅ Model found in bundle:', bundlePath);
+          devLogger.info('Model found in bundle', { bundlePath });
           return { uri: bundlePath };
         } else {
           throw new Error('Model file not found in bundle directory');
         }
       } catch (bundleError) {
-        console.warn('❌ Bundle path failed:', bundleError);
+        devLogger.warn('Bundle path failed', bundleError);
       }
 
       // Method 4: List available assets for debugging
-      console.log('📋 Listing available assets for debugging...');
+      devLogger.debug('Listing available assets for debugging...');
       try {
         const assetsPath = `${FileSystem.bundleDirectory}assets`;
         const assetsInfo = await FileSystem.getInfoAsync(assetsPath);
-        console.log('📂 Assets directory info:', assetsInfo);
+        devLogger.debug('Assets directory info', assetsInfo);
         
         if (assetsInfo.exists && assetsInfo.isDirectory) {
           const assetsContents = await FileSystem.readDirectoryAsync(assetsPath);
-          console.log('📋 Assets directory contents:', assetsContents);
+          devLogger.debug('Assets directory contents', assetsContents);
         }
       } catch (listError) {
-        console.warn('❌ Could not list assets:', listError);
+        devLogger.warn('Could not list assets', listError);
       }
 
       throw new Error('Model file not found in any location. Check that model.tflite exists in assets/model/ directory and is properly bundled.');
     } catch (error) {
-      console.error('❌ Failed to get model source:', error);
+      devLogger.error('Failed to get model source', error);
       throw error;
     }
   }
-
   /**
    * Initialize and load the TensorFlow Lite model
    */
   async initializeModel(): Promise<void> {
-    console.log('🚀 Starting TensorFlow Lite model initialization...');
+    devLogger.model('Starting TensorFlow Lite model initialization...');
     
     try {
       if (this.isModelLoaded) {
-        console.log('✅ Model already loaded, skipping initialization');
+        devLogger.model('Model already loaded, skipping initialization');
         return;
       }
 
       if (!isTensorFlowLiteAvailable()) {
-        console.warn('⚠️ TensorFlow Lite not available, running in simulation mode');
+        devLogger.warn('TensorFlow Lite not available, running in simulation mode', undefined, 'SIMULATION');
         this.isModelLoaded = true; // Mark as loaded for simulation
         return;
       }
 
       // Get model source
       const modelSource = await this.getModelSource();
-      console.log('📄 Model source obtained:', modelSource);      // Load model with proper delegate configuration
+      devLogger.model('Model source obtained', modelSource);
+
+      // Load model with proper delegate configuration
       const delegate: TensorflowModelDelegate = Platform.OS === 'android' ? 'default' : 'default';
       
       try {
-        console.log('🔄 Loading TensorFlow Lite model...');
+        devLogger.model('Loading TensorFlow Lite model...');
         this.model = await loadTensorflowModel(modelSource, delegate);
         
         if (!this.model) {
           throw new Error('Model loading returned null');
         }
         
-        console.log('✅ Model loaded successfully!');
-        console.log(`📊 Model info:`, {
+        devLogger.model('Model loaded successfully!', {
           inputs: this.model.inputs.map(input => ({
             name: input.name,
             dataType: input.dataType,
@@ -190,30 +207,32 @@ class TFLiteService {
         
         this.isModelLoaded = true;
       } catch (fallbackError) {
-        console.warn('❌ TensorFlow Lite loading failed, falling back to simulation mode:', fallbackError);
+        devLogger.warn('TensorFlow Lite loading failed, falling back to simulation mode', fallbackError, 'SIMULATION');
         this.model = null;
         this.isModelLoaded = true; // Mark as loaded for simulation
       }
     } catch (error) {
-      console.error('❌ Critical error during model initialization:', error);
+      devLogger.error('Critical error during model initialization', error, 'MODEL');
       throw new Error(`Failed to initialize TensorFlow Lite model: ${error}`);
     }
   }
-
   /**
    * Preprocess the image before analysis
    */
   private async preprocessImage(imageUri: string): Promise<string> {
     try {
+      if (DEVELOPMENT_CONFIG.debugging.logImagePreprocessing) {
+        devLogger.image('Preprocessing image', { imageUri });
+      }
+      
       // For now, return the image as-is
       // In the future, you could add image preprocessing here
       return imageUri;
     } catch (error) {
-      console.error('❌ Error preprocessing image:', error);
+      devLogger.error('Error preprocessing image', error, 'IMAGE');
       throw error;
     }
   }
-
   /**
    * Analyze an image and return predictions
    */
@@ -226,65 +245,77 @@ class TFLiteService {
       }
 
       let results: any;
-      
-      if (!this.model || !isTensorFlowLiteAvailable()) {
-        console.log('🎭 Running in simulation mode');
-        results = this.generateSimulatedResults();
+      let metadata: any = {};
+        if (!this.model || !isTensorFlowLiteAvailable()) {
+        devLogger.simulation('Running in simulation mode');
+        const simulationResult = await modelSimulation.generateSimulatedResults(imageUri);
+        results = [simulationResult.confidences];
+        metadata = simulationResult.metadata;
       } else {
-        console.log('🔍 Running real model inference');
+        devLogger.model('Running real model inference');
         const processedImageUri = await this.preprocessImage(imageUri);
         const imageData = await this.imageToTensor(processedImageUri);
         
         try {
           results = this.model.runSync([imageData]); // Sync version (faster)
+          metadata = {
+            isSimulated: false,
+            modelVersion: '1.0.0',
+            inputShape: this.model.inputs[0]?.shape || [],
+          };
         } catch (inferenceError) {
-          console.warn('❌ Model inference failed, falling back to simulation:', inferenceError);
-          results = this.generateSimulatedResults();
+          devLogger.warn('Model inference failed, falling back to simulation', inferenceError);
+          const simulationResult = await modelSimulation.generateSimulatedResults(imageUri);
+          results = [simulationResult.confidences];
+          metadata = {
+            ...simulationResult.metadata,
+            fallbackReason: 'inference_error',
+          };
         }
       }
       
       const predictions = this.processModelOutput(results);
       const processingTime = performance.now() - startTime;
       
-      console.log(`✅ Analysis complete in ${processingTime.toFixed(2)}ms`);
+      if (DEVELOPMENT_CONFIG.debugging.logModelOutputs) {
+        devLogger.model('Model output processed', {
+          predictionsCount: predictions.length,
+          topPrediction: predictions[0],
+          metadata,
+        });
+      }
       
-      return {
+      const result: ModelResult = {
         predictions,
         processingTime,
+        metadata,
       };
+      
+      // Save to analysis history if enabled
+      if (DEVELOPMENT_CONFIG.debugging.saveAnalysisHistory) {
+        this.analysisHistory.push({
+          image: imageUri,
+          results: result,
+          timestamp: Date.now(),
+        });
+        
+        // Keep only last 50 analyses
+        if (this.analysisHistory.length > 50) {
+          this.analysisHistory = this.analysisHistory.slice(-50);
+        }
+      }
+      
+      devLogger.performance('Analysis complete', startTime, {
+        predictionsCount: predictions.length,
+        isSimulated: metadata.isSimulated,
+      });
+      
+      return result;
     } catch (error) {
-      console.error('❌ Error analyzing image:', error);
+      devLogger.error('Error analyzing image', error);
       throw error;
     }
-  }
-  /**
-   * Generate simulated results for testing/demo purposes
-   */
-  private generateSimulatedResults(): Float32Array[] {
-    // Simulate model output with realistic confidence values
-    const classCount = PLANT_ANALYSIS_CONFIG.outputClasses.length;
-    const confidences = new Float32Array(classCount);
-    
-    // Generate random but realistic confidence values
-    let total = 0;
-    for (let i = 0; i < classCount; i++) {
-      confidences[i] = Math.random();
-      total += confidences[i];
-    }
-    
-    // Normalize to sum to 1 (like softmax)
-    for (let i = 0; i < classCount; i++) {
-      confidences[i] /= total;
-    }
-    
-    // Make one class significantly more confident
-    const topClass = Math.floor(Math.random() * classCount);
-    confidences[topClass] = Math.max(0.6, confidences[topClass]);
-    
-    return [confidences];
-  }
-
-  /**
+  }  /**
    * Process raw model output into structured predictions
    */
   private processModelOutput(rawOutput: any): Array<{ className: string; confidence: number; recommendations?: any }> {

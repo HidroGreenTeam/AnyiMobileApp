@@ -18,6 +18,7 @@ const IconSymbol = ({ name, size, color, style }: { name: string, size: number, 
     'camera': 'camera-outline',
     'leaf': 'leaf-outline',
     'person': 'person-outline',
+    'flask': 'flask-outline', // Para el icono de pruebas
   };
   
   const ionIconName = iconMapping[name as keyof typeof iconMapping] || name;
@@ -122,8 +123,7 @@ export default function TabLayout() {
             <Text style={{ color, fontSize: 12, marginBottom: Platform.OS === 'ios' ? 10 : 5 }}>{t('My Plants')}</Text>
           ),
         }}
-      />
-      <Tabs.Screen
+      />      <Tabs.Screen
         name="account"
         options={{
           title: 'Account',

@@ -140,7 +140,6 @@ const AccountScreen = memo(() => {
 
     return () => unsubscribe();
   }, [error, handleRetry]);
-
   // Memoize menu item handlers
   const handleNotifications = useCallback(() => console.log('Notifications pressed'), []);
   const handleSecurity = useCallback(() => console.log('Account & Security pressed'), []);
@@ -150,18 +149,23 @@ const AccountScreen = memo(() => {
   const handleAppearance = useCallback(() => console.log('Appearance pressed'), []);
   const handleAnalytics = useCallback(() => console.log('Analytics pressed'), []);
   const handleSupport = useCallback(() => console.log('Support pressed'), []);
+  const handleModelTest = useCallback(() => {
+    router.push('/testing/model-test' as any);
+  }, [router]);  // Memoize menu items array to prevent re-creation on each render
+  const menuItems = React.useMemo(() => {
+    const baseItems = [
+      { icon: 'notifications-outline', title: t('Notifications'), onPress: handleNotifications },
+      { icon: 'shield-checkmark-outline', title: t('Account & Security'), onPress: handleSecurity },
+      { icon: 'star-outline', title: t('Billing & Subscriptions'), onPress: handleBilling },
+      { icon: 'card-outline', title: t('Payment Methods'), onPress: handlePayment },
+      { icon: 'git-network-outline', title: t('Linked Accounts'), onPress: handleLinkedAccounts },
+      { icon: 'eye-outline', title: t('App Appearance'), onPress: handleAppearance },
+      { icon: 'analytics-outline', title: t('Data & Analytics'), onPress: handleAnalytics },
+      { icon: 'help-circle-outline', title: t('Help & Support'), onPress: handleSupport },
+    ];
 
-  // Memoize menu items array to prevent re-creation on each render
-  const menuItems = React.useMemo(() => [
-    { icon: 'notifications-outline', title: 'Notifications', onPress: handleNotifications },
-    { icon: 'shield-checkmark-outline', title: 'Account & Security', onPress: handleSecurity },
-    { icon: 'star-outline', title: 'Billing & Subscriptions', onPress: handleBilling },
-    { icon: 'card-outline', title: 'Payment Methods', onPress: handlePayment },
-    { icon: 'git-network-outline', title: 'Linked Accounts', onPress: handleLinkedAccounts },
-    { icon: 'eye-outline', title: 'App Appearance', onPress: handleAppearance },
-    { icon: 'analytics-outline', title: 'Data & Analytics', onPress: handleAnalytics },
-    { icon: 'help-circle-outline', title: 'Help & Support', onPress: handleSupport },
-  ], [
+    return baseItems;
+  }, [
     handleNotifications, 
     handleSecurity, 
     handleBilling, 
@@ -169,8 +173,24 @@ const AccountScreen = memo(() => {
     handleLinkedAccounts, 
     handleAppearance, 
     handleAnalytics, 
-    handleSupport
-  ]);  useEffect(() => {
+    handleSupport,
+    t
+  ]);
+
+  // Elementos de desarrollo separados para mejor organización
+  const devMenuItems = React.useMemo(() => {
+    if (!__DEV__) return [];
+    
+    return [
+      { 
+        icon: 'flask-outline', 
+        title: 'Model Testing', 
+        onPress: handleModelTest,
+        color: '#FF6B6B',
+        textColor: '#FF6B6B'
+      },
+    ];
+  }, [handleModelTest]);useEffect(() => {
     let isMounted = true;
     if (isMounted) {
       fetchUserData();
@@ -289,9 +309,7 @@ const AccountScreen = memo(() => {
             <Text style={styles.upgradeSubtitle}>{t('Enjoy all the benefits and explore more possibilities')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-
-        {/* Menu Items */}
+        </TouchableOpacity>        {/* Menu Items */}
         {menuItems.map((item, index) => (
           <MenuItem 
             key={index} 
@@ -300,6 +318,25 @@ const AccountScreen = memo(() => {
             onPress={item.onPress} 
           />
         ))}
+
+        {/* Development Tools Section - Only visible in development mode */}
+        {devMenuItems.length > 0 && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>🛠️ Developer Tools</Text>
+            </View>
+            {devMenuItems.map((item, index) => (
+              <MenuItem 
+                key={`dev-${index}`} 
+                icon={item.icon} 
+                title={item.title} 
+                onPress={item.onPress} 
+                color={item.color}
+                textColor={item.textColor}
+              />
+            ))}
+          </>
+        )}
 
         {/* Language Switch Button */}
         <TouchableOpacity
@@ -454,11 +491,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 20,
-  },
-  menuItemText: {
+  },  menuItemText: {
     flex: 1,
     fontSize: 16,
     color: '#333333',
+  },
+  sectionHeader: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+    backgroundColor: '#F8F9FA',
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666666',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   errorProfileSection: {
     alignItems: 'center',

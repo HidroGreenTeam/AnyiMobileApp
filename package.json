@@ -9,7 +9,20 @@
 		"ios": "expo start --ios",
 		"web": "expo start --web",
 		"test": "jest --watchAll",
-		"lint": "expo lint"
+		"lint": "expo lint",
+		"dev-client": "expo start --dev-client",
+		"build:dev:android": "eas build --platform android --profile development",
+		"build:dev:ios": "eas build --platform ios --profile development",
+		"build:preview:android": "eas build --platform android --profile preview",
+		"test:model": "npx ts-node scripts/test-tflite-service.ts",
+		"test:model-enhanced": "npx ts-node scripts/test-enhanced-tflite.ts",
+		"test:model-quick": "npx ts-node scripts/test-enhanced-tflite.ts quick",
+		"test:model-benchmark": "npx ts-node scripts/test-enhanced-tflite.ts benchmark",
+		"test:model-interactive": "npx ts-node scripts/test-enhanced-tflite.ts interactive",
+		"test:model-simple": "node scripts/test-simple.js",
+		"test:model-loading": "npx ts-node scripts/test-model-loading.ts",
+		"setup:dev": "npx ts-node scripts/setup-dev-environment.ts",
+		"verify:system": "node scripts/final-verification.js"
 	},
 	"jest": {
 		"preset": "jest-expo"
