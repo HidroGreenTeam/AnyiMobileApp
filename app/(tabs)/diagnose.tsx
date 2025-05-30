@@ -7,12 +7,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyledText } from '@/components/StyledText';
 import { StyleColors, Spacing } from '@/constants';
 import { AnalysisResult } from '@/services/tflite-service';
+import { useTabBarPadding } from '@/hooks/useTabBarPadding';
 import { t } from 'i18next';
 
 // Use React.memo to prevent unnecessary re-renders
 const DiagnoseScreen = memo(() => {
   const params = useLocalSearchParams();
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null);
+  const tabBarPadding = useTabBarPadding();
 
   useEffect(() => {
     if (params.analysisData) {
@@ -79,7 +81,11 @@ const DiagnoseScreen = memo(() => {
         </StyledText>
       </View>
       
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollContainer} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: tabBarPadding }}
+      >
         {/* Image Preview */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: analysisData.image }} style={styles.analysisImage} />

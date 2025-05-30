@@ -16,7 +16,6 @@ export default function BlurTabBarBackground() {
 }
 
 export function useBottomTabOverflow() {
-  const tabHeight = useBottomTabBarHeight();
-  const { bottom } = useSafeAreaInsets();
-  return tabHeight - bottom;
+  // Para iOS retornamos la altura del tab bar (90px) ya que está en posición absoluta
+  return 90; // Altura del tab bar para iOS
 }

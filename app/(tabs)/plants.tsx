@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { StyledText } from '@/components/StyledText';
 import { StyleColors, Spacing, BorderRadius } from '@/constants';
+import { useTabBarPadding } from '@/hooks/useTabBarPadding';
 import { t } from 'i18next';
 
 // Define plant data type
@@ -100,6 +101,8 @@ const PLANTS_DATA: PlantData[] = [
 
 
 const PlantsScreen = memo(() => {
+  const tabBarPadding = useTabBarPadding();
+  
   // Handle plant selection
   const handlePlantPress = useCallback((id: string) => {
     console.log(`Plant ${id} selected`);
@@ -133,12 +136,11 @@ const PlantsScreen = memo(() => {
         </TouchableOpacity>
       </View>
       
-      {!isEmpty ? (
-        <FlatList
+      {!isEmpty ? (        <FlatList
           data={PLANTS_DATA}
           renderItem={renderPlantItem}
           keyExtractor={keyExtractor}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: tabBarPadding }]}
           showsVerticalScrollIndicator={false}
         />
       ) : (

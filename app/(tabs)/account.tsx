@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import i18n, { changeLanguage } from '@/i18n/i18n';
+import { useTabBarPadding } from '@/hooks/useTabBarPadding';
 
 // Memoized MenuItem component to prevent unnecessary re-renders
 const MenuItem = memo(({ icon, title, onPress, color = '#666666', textColor = '#333333' }: {
@@ -29,6 +30,7 @@ const MenuItem = memo(({ icon, title, onPress, color = '#666666', textColor = '#
 // Main component using React.memo to prevent unnecessary re-renders
 const AccountScreen = memo(() => {
   const { t } = useTranslation();
+  const tabBarPadding = useTabBarPadding();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -270,14 +272,13 @@ const AccountScreen = memo(() => {
     );
   }
 
-  const displayName = userData ? `${userData.firstName} ${userData.lastName}` : t('User');
-  console.log('User Data:', userData);
+  const displayName = userData ? `${userData.firstName} ${userData.lastName}` : t('User');  console.log('User Data:', userData);
   const email = userData?.email || '';
   const photoUrl = userData?.photoUrl || 'https://via.placeholder.com/60';
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarPadding }}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Ionicons name="leaf" size={24} color="#00A86B" />
